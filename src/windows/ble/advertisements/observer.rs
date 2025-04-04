@@ -177,6 +177,22 @@ impl ReportInfoWatcher {
         let watcher = RawWatcher::new(ReportInfoCallback::from_sender(tx))?;
         Ok(Self { watcher, rx })
     }
+    pub fn set_scan_enable(&mut self, is_enabled: bool) -> Result<(), WindowsError> {
+        if is_enabled {
+            self.watcher.watcher.start()?;
+        } else {
+            self.watcher.watcher.stop()?;
+        }
+        Ok(())
+    }
+    pub fn set_scanning_mode(&mut self, scanning_mode: scan::ScanType) -> Result<(), WindowsError> {
+        let mode = match scanning_mode {
+            ScanType::Passive => BluetoothLEScanningMode::Passive,
+            ScanType::Active => BluetoothLEScanningMode::Active,
+        };
+        self.watcher.watcher.set_scanning_mode(mode)?;
+        Ok(())
+    }
     pub fn advertisement_stream(&mut self) -> AdvertisementStream<'_> {
         AdvertisementStream::new(self)
     }
